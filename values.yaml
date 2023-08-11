@@ -1,0 +1,18 @@
+neo4j:
+  name: my-standalone
+  resources:
+    cpu: "0.5"
+    memory: "2Gi"
+
+  password: "hamzaboubnane"
+
+  # Uncomment to use enterprise edition
+  #edition: "enterprise"
+  acceptLicenseAgreement: "yes"
+
+volumes:
+  data:
+    mode: "dynamic"
+    dynamic:
+     # gp2 is a general-purpose SSD volume
+     storageClassName: gp2
