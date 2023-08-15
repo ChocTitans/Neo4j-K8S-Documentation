@@ -8,7 +8,6 @@ resources:
 - ./configmap-server-logs.yaml
 - ./configmap-user-logs.yaml
 - ./configmap-user.yaml
-- ./secret.yaml
 - ./service-admin.yaml
 - ./service.yaml
 - ./statefulset.yaml
