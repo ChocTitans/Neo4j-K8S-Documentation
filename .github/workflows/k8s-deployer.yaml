@@ -1,0 +1,23 @@
+name: Deploy Neo4j in K8S
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Update Neo4j Image
+      run: |
+        export NEO4J_IMAGE_VERSION=${{ vars.NEO4J_IMAGE_VERSION }}
+        envsubst < ./base/statefulset.yaml > ./base/statefulset_updated.yaml
+        mv ./base/statefulset_updated.yaml ./base/statefulset.yaml
+
+    - uses: actions/checkout@v2
+    - name: build using custom actions
+      uses : ChocTitans/composite-action@composite
+      with :
+       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       aws-cluster-name: ${{ vars.AWS_NAME_CLUSTER }}
+       aws-region: ${{ vars.AWS_REGION }}
+       secrets: ${{ toJson(secrets) }}

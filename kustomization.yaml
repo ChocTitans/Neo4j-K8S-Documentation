@@ -8,3 +8,8 @@ commonLabels:
 
 resources:
 - ./base
+
+secretGenerator:
+- name: neo4j-secret
+  envs:
+  - secret.env # values can be modified in github's repository secrets

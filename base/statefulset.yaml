@@ -34,7 +34,7 @@ spec:
       terminationGracePeriodSeconds: 3600            
       containers:
         - name: "neo4j"
-          image: "neo4j:5.10.0"
+          image: "neo4j:$NEO4J_IMAGE_VERSION"
           imagePullPolicy: "IfNotPresent"
           envFrom:
             - configMapRef:
@@ -42,10 +42,6 @@ spec:
             - secretRef:
                 name: "neo4j-secret"
           env:
-            - name: HELM_NEO4J_VERSION
-              value: "5.10.0"
-            - name: HELM_CHART_VERSION
-              value: "5.10.0"
             - name: POD_NAME
               valueFrom:
                 fieldRef:
