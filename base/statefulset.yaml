@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: neo4j-server-1
+spec:
+  serviceName: "neo4j-server-1"
+  podManagementPolicy: "Parallel" # This setting means that the StatefulSet controller doesn't block applying changes until the existing Pod is READY.
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "neo4j-server-1"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "neo4j"
+        app.kubernetes.io/component: "neo4j-instance" # used for anti affinity rules
+        app.kubernetes.io/instance: "neo4j-server-1"        
+      annotations:
+        "checksum/server-1-config": 3e60f7fa0149abf29ba5d4b1374402f6fbcba8e69e9dc20d9fe089b84abbec85        
+    spec:      
+      affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: "neo4j-instance"
+                topologyKey: kubernetes.io/hostname
+      securityContext: 
+        fsGroup: 7474
+        fsGroupChangePolicy: Always
+        runAsGroup: 7474
+        runAsNonRoot: true
+        runAsUser: 7474
+      terminationGracePeriodSeconds: 3600            
+      containers:
+        - name: "neo4j"
+          image: "neo4j:5.10.0"
+          imagePullPolicy: "IfNotPresent"
+          envFrom:
+            - configMapRef:
+                name: "neo4j-server-1-env"
+            - secretRef:
+                name: "neo4j-secret"
+          env:
+            - name: HELM_NEO4J_VERSION
+              value: "5.10.0"
+            - name: HELM_CHART_VERSION
+              value: "5.10.0"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SERVICE_NEO4J_ADMIN
+              value: "server-1-admin.default.svc.cluster.local"
+            - name: SERVICE_NEO4J_INTERNALS
+              value: "server-1-internals.default.svc.cluster.local"
+            - name: SERVICE_NEO4J
+              value: "server-1.default.svc.cluster.local"
+          ports:
+            - containerPort: 7474
+              name: http
+            - containerPort: 7687
+              name: bolt
+            - containerPort: 7473
+              name: https
+            - containerPort: 6362
+              name: backup
+          securityContext: 
+              runAsGroup: 7474
+              runAsNonRoot: true
+              runAsUser: 7474
+          volumeMounts:
+            - mountPath: "/config/neo4j.conf"
+              name: neo4j-conf
+            - mountPath: "/config/server-logs.xml"
+              name: neo4j-server-logs
+            - mountPath: "/config/user-logs.xml"
+              name: neo4j-user-logs               
+            - mountPath: "/backups"
+              name: "data"
+              subPathExpr: "backups"
+            - mountPath: "/data"
+              name: "data"
+              subPathExpr: "data"
+            - mountPath: "/import"
+              name: "data"
+              subPathExpr: "import"
+            - mountPath: "/licenses"
+              name: "data"
+              subPathExpr: "licenses"
+            - mountPath: "/logs"
+              name: "data"
+              subPathExpr: "logs/$(POD_NAME)"
+            - mountPath: "/metrics"
+              name: "data"
+              subPathExpr: "metrics/$(POD_NAME)"            
+          readinessProbe:
+            tcpSocket:
+              port: 7687
+            failureThreshold: 20
+            timeoutSeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 7687
+            failureThreshold: 40
+            timeoutSeconds: 10
+            periodSeconds: 5
+          startupProbe:
+            tcpSocket:
+              port: 7687
+            failureThreshold: 1000
+            periodSeconds: 5
+      volumes:
+        - name: neo4j-conf
+          projected:
+            defaultMode: 0440
+            sources:
+              - configMap:
+                  name: "neo4j-server-1-default-config"
+              - configMap:
+                  name: "neo4j-server-1-user-config"
+              - configMap:
+                  name: "neo4j-server-1-k8s-config"
+        - name: neo4j-server-logs
+          configMap:
+            name: "neo4j-server-1-server-logs-config"    
+        - name: neo4j-user-logs
+          configMap:
+            name: "neo4j-server-1-user-logs-config"
+        - name: data
+          persistentVolumeClaim:
+            claimName: "neo4j-pvc"
