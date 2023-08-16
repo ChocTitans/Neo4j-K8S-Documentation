@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namePrefix: app-
+metadata:
+  name: neo4j-ressources
+commonLabels:
+  app: neo4j
+
+resources:
+- ./base
+
+secretGenerator:
+- name: neo4j-auth
+  envs:
+  - secret.env # values can be modified in github's repository secrets

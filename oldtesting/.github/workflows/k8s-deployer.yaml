@@ -43,7 +43,7 @@ jobs:
           
       - name: Generate ConfigMap YAML
         run: |
-          cat <<EOF > ./base/configmaps/configmap.yaml
+          cat <<EOF > ./base/configmap.yaml
           apiVersion: v1
           kind: ConfigMap
           metadata:
@@ -51,7 +51,8 @@ jobs:
           data:
           $(awk -F '=' '{printf "  %s: \"%s\"\n", $1, $2}' configmap.env)
           EOF
-
+          cat ./base/configmap.yaml
+          
       - name: Update Neo4j Image
         run: |
           export NEO4J_IMAGE_VERSION=${{ vars.NEO4J_IMAGE_VERSION }}
@@ -60,5 +61,7 @@ jobs:
           
       - name: Kustomize build & apply
         run: |
+          kustomize build . | kubectl delete -f - || true
+          sleep 5
           kustomize build . | kubectl apply -f -
           

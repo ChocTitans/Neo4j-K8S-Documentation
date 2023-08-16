@@ -1,6 +1,5 @@
 # **Neo4j deployment in K8s**
 
-
 ## **Requirements**
 
 - EBS CSI DRIVER `Will be added in IaC` [@OfficialDocumentation](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html)

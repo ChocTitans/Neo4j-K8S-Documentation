@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "neo4j-default-config" 
+data:
+  # Neo4j defaults
+  server.bolt.enabled: 'true'
+  server.http.enabled: 'true'
+  server.https.enabled: 'false'
+  server.metrics.csv.rotation.compression: zip
+  server.windows_service_name: neo4j
+  server.panic.shutdown_on_panic: 'true'
+  
+  server.logs.config: /config/server-logs.xml/server-logs.xml
+  server.logs.user.config: /config/user-logs.xml/user-logs.xml
+
+  # Bolt keep alive
+  # this helps to ensure that LoadBalancers do not close bolt connections that are in use but appear idle
+  server.bolt.connection_keep_alive: "30s"
+  server.bolt.connection_keep_alive_for_requests: "ALL"
+  server.bolt.connection_keep_alive_streaming_scheduling_interval: "30s"
+
+  # If we set default advertised address it over-rides the bolt address used to populate the browser in a really annoying way
+  # dbms.default_advertised_address: "$(bash -c 'echo ${SERVICE_DOMAIN}')"
+  server.backup.listen_address: "0.0.0.0:6362"
+
+
+  # Other
+  internal.dbms.ssl.system.ignore_dot_files: "true"
+  # Logging
+  server.directories.logs: "/logs"
+  # Metrics
+  server.directories.metrics: "/metrics"
+  # Import
+  server.directories.import: "/import"
+
+  # Use more reliable defaults SSL / TLS settings for K8s
+  dbms.ssl.policy.bolt.client_auth: "NONE"
+  dbms.ssl.policy.https.client_auth: "NONE"

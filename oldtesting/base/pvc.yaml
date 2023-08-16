@@ -10,5 +10,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 30Gi
-  storageClassName: gp3-retain-sc
+      storage: 5Gi
+  storageClassName: gp3-delete-sc
