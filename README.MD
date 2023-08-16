@@ -1,9 +1,9 @@
+# **Neo4j deployment in K8s**
 
-### **Lago deployment in K8s**
-
-### **Requirements**
+## **Requirements**
 
 - EBS CSI DRIVER `Will be added in IaC` [@OfficialDocumentation](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html)
+
 
 
 ### **Kustomization**
@@ -26,106 +26,35 @@ Add them to your repository's secrets :
 
 - Click on 'New repository secret' or 'Add a secret environment' button.
 
-- For the name, enter `LAGO_API_URL` and the other variables.
+- For the name, enter `NEO4J_AUTH`.
 
 - Input the new master key value in the 'Value' field.
 
-These secrets and configmap has to be defined in a workflow `Github Actions` : 
+:warning: You must put `username/password` in the secret for `NEO4J_AUTH`, example : `neo4j/thisiscomplicated`
+
+A file named secret.env will be created and will contain all the secrets created in the github's repository
 
 ```
-      - name: Create ConfigMap file
+      - name: Create Secret file
+        env:
+          SECRETS: '${{ toJson(secrets) }}'
         run: |
-          cd Lago-K8S
-          echo "LAGO_API_URL=${{ env.LAGO_API_URL }}" > configmap.env
-          echo "LAGO_FRONT_URL=${{ env.LAGO_FRONT_URL }}" >> configmap.env
-          echo "LAGO_REDIS_URL=${{ env.LAGO_REDIS_URL }}" >> configmap.env
-          echo "LAGO_PDF_URL=${{ env.LAGO_PDF_URL }}" >> configmap.env
-
-
-      - name: Create secrets file
-        run: |
-          cd Lago-K8S
-          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > secret.env
-          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> secret.env
-          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> secret.env
-          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@app-lago-postgres:5432/${{ secrets.POSTGRES_DB }}" >> secret.env
-          echo "API_SECRET=${{ secrets.API_SECRET }}" >> secret.env
+          for secret in $(echo "$SECRETS" | jq -r 'keys[] | select(. != "github_token")'); do
+            value="$(jq -r --arg key "$secret" '.[$key]' <<< "$SECRETS")"
+            echo "$secret=$value" >> secret.env
+          done
 
 ```
-in `DATABASE_URL`, @`DB` has to match to postgres service's name and since we have `namePrefix: app-` in kustomization.yaml then it'll be `app-lago-postgres` (by default)
 
-Same goes for `LAGO_REDIS_URL` : redis://redisservicename:6379 => `redis://app-lago-redis:6379` (by default)
-
-
-It will create a secret/configmap based on these variables and can be modified only in Github repo's secret variables.
+It will create a secret based on these variables and can be modified only in Github repo's secret variables.
 
 ---
 
-### **Secrets (Examples)**
 
-**Postgres**
 
-These are defined in `POSTGRES` folder.
 
-Same goes for `POSTGRES_PASSWORD`,`POSTGRES_USER`
+### Testing
 
-File : `./postgres/deployment.yaml`
-```
-  - name: POSTGRES_DB
-    valueFrom:
-      secretKeyRef:
-        name: lago-secret
-        key: POSTGRES_DB
-```
----
-
-**Api**
-
-These are defined in `API` folder.
-
- `DATABASE_URL`, `API_SECRET`
-
-File : `./api/deployment.yaml`, same goes for `./api/worker/deployment.yaml`, `./api/clock/deployment.yaml`
-
-```
-  - name: LAGO_RSA_PRIVATE_KEY
-    valueFrom:
-      secretKeyRef:
-        name: lago-secret
-        key: API_SECRET
-```
-
-```
-  - name: DATABASE_URL
-    valueFrom:
-      secretKeyRef:
-        name: lago-secret
-        key: DATABASE_URL
-```
-
-### **ConfigMap (Examples)**
-
-Also have to edit them in repo's secret variables, by default `LAGO_API_URL:http://localhost:3000` and `LAGO_FRONT_URL:http://localhost`
-
-**Api**
-
-```
-  - name: LAGO_API_URL
-    valueFrom:
-      configMapKeyRef:
-        name: lago-configmap
-        key: LAGO_API_URL
-```
-
-```
-  - name: LAGO_FRONT_URL
-    valueFrom:
-      configMapKeyRef:
-        name: lago-configmap
-        key: LAGO_FRONT_URL
-```
-
----
 
 Once everything is setup, To apply all the resources, run the following command:
 

@@ -128,9 +128,6 @@ spec:
         - name: neo4j-user-logs
           configMap:
             name: "neo4j-user-logs-config" 
-  volumeClaimTemplates: 
-  - metadata:
-      name: "data"
-      source:
-        pvc:
-          name: neo4j-pvc # This references the volume template
+        - name: "data"
+          persistentVolumeClaim:
+            claimName: "neo4j-pvc"
