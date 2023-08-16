@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
 - ./configmap-default.yaml
 - ./configmap-k8s.yaml
-- ./configmap-env.yaml
+- ./configmap.yaml
 - ./configmap-server-logs.yaml
 - ./configmap-user-logs.yaml
 - ./configmap-user.yaml
