@@ -1,14 +1,15 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "neo4j-server-1-default-config"
+  name: "neo4j-default-config" 
 data:
   # Neo4j defaults
   server.bolt.enabled: 'true'
   server.http.enabled: 'true'
   server.https.enabled: 'false'
-  db.tx_log.rotation.retention_policy: 1 days
+  server.metrics.csv.rotation.compression: zip
   server.windows_service_name: neo4j
+  server.panic.shutdown_on_panic: 'true'
   
   server.logs.config: /config/server-logs.xml/server-logs.xml
   server.logs.user.config: /config/user-logs.xml/user-logs.xml
@@ -21,12 +22,15 @@ data:
 
   # If we set default advertised address it over-rides the bolt address used to populate the browser in a really annoying way
   # dbms.default_advertised_address: "$(bash -c 'echo ${SERVICE_DOMAIN}')"
+  server.backup.listen_address: "0.0.0.0:6362"
 
 
   # Other
   internal.dbms.ssl.system.ignore_dot_files: "true"
   # Logging
   server.directories.logs: "/logs"
+  # Metrics
+  server.directories.metrics: "/metrics"
   # Import
   server.directories.import: "/import"
 

@@ -1,13 +1,10 @@
 neo4j:
-  name: my-standalone
+  name: "neo4j"
   resources:
     cpu: "0.5"
     memory: "2Gi"
-  minimumClusterSize: 2
   password: "hamzaboubnane"
-
-  # Uncomment to use enterprise edition
-  #edition: "enterprise"
+  edition: "enterprise"
   acceptLicenseAgreement: "yes"
 
 volumes:

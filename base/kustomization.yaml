@@ -11,5 +11,3 @@ resources:
 - ./service-admin.yaml
 - ./service.yaml
 - ./statefulset.yaml
-- ./pvc.yaml
-- ./ingress.yaml

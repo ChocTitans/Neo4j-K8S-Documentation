@@ -10,6 +10,6 @@ resources:
 - ./base
 
 secretGenerator:
-- name: neo4j-secret
+- name: neo4j-auth
   envs:
   - secret.env # values can be modified in github's repository secrets
