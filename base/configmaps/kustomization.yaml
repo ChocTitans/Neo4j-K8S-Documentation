@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
 - ./configmap-default.yaml
 - ./configmap-k8s.yaml
-- ./configmap.yaml # created by the workflow
 - ./configmap-server-logs.yaml
 - ./configmap-user-logs.yaml
 - ./configmap-user.yaml
