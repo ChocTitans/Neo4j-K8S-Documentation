@@ -26,7 +26,6 @@ jobs:
           sudo mv kustomize /usr/local/bin/
 
       - name: Create Secret file
-        working-directory: ./k8s
         env:
           SECRETS: '${{ toJson(secrets) }}'
         run: |
@@ -41,7 +40,6 @@ jobs:
           fi
 
       - name: Append Github Vars to ConfigMap
-        working-directory: ./k8s
         env:
           VARS: '${{ toJson(vars) }}'
         run: |
@@ -58,12 +56,9 @@ jobs:
           envsubst < ./base/statefulset.yaml > ./base/statefulset_updated.yaml
           mv ./base/statefulset_updated.yaml ./base/statefulset.yaml
           
-      - name: Create ArgoCD app
+      - name: Kustomize build & apply
         run: |
-          argocd app create my-app \
-            --repo "https://github.com/${GITHUB_REPOSITORY} \
-            --path k8s \
-            --dest-server https://kubernetes.default.svc \
-            --dest-namespace default \
-            --sync-policy automated \
-            --upsert secret.env=@secret.env
+          kustomize build . | kubectl delete -f - || true
+          sleep 5
+          kustomize build . | kubectl apply -f -
+          
