@@ -17,4 +17,4 @@ secretGenerator:
 configMapGenerator:
 - name: neo4j-env
   envs:
-  - config.env # values can be modified in github's repository secrets
+  - configmap.env # values can be modified in github's repository secrets
