@@ -38,7 +38,7 @@ spec:
       terminationGracePeriodSeconds: 3600            
       containers:
         - name: "neo4j"
-          image: "neo4j:$NEO4J_IMAGE_VERSION"
+          image: "neo4j:5.10.0-enterprise"
           imagePullPolicy: "IfNotPresent"
           envFrom:
             - configMapRef:
